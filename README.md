@@ -36,4 +36,3 @@ për ruajtjen dhe leximin e të dhënave të rezervimeve.
 ### ▪ Rezervimi i fundit
 Versioni përkatës ruan vetëm rezervimin e fundit në localStorage dhe e
 shfaq atë automatikisht edhe pas rifreskimit të faqes.
----
