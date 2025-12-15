@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+  <meta charset="UTF-8" />
+  <title>FSHN - Sistemi i Rezervimit të Fluturimeve</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+    h1, h2 { text-align: center; }
+    .header-fshn { text-align:center; font-size:20px; font-weight:bold; margin-bottom:10px; color:#004080; }
+    .container { display:flex; gap:20px; align-items:flex-start; }
+    table { border-collapse: collapse; width: 100%; background: white; }
+    th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: center; }
+    th { background: #e0e0e0; }
+    form { background: white; padding: 10px; border: 1px solid #ccc; }
+    label { display: block; margin-top: 8px; }
+    input, select { width: 100%; padding: 5px; margin-top: 3px; box-sizing: border-box; }
+    .column { flex: 1; }
+    button { margin-top: 10px; width: 100%; padding: 8px; cursor: pointer; }
+    #ticket {
+      margin-top: 10px;
+      background: white;
+      padding: 10px;
+      border: 1px dashed #333;
+      white-space: pre-line;
+    }
+    .list-box{
+      margin-top: 10px;
+      background: white;
+      padding: 10px;
+      border: 1px solid #ccc;
+    }
+    .booking-item{
+      border: 1px dashed #999;
+      padding: 10px;
+      white-space: pre-line;
+      margin-top: 10px;
+      background: #fafafa;
+    }
+    .row-actions { display:flex; gap:10px; margin-top:10px; }
+    .row-actions button { width: 100%; }
+  </style>
+</head>
+<body>
+
+<div class="header-fshn">
+  UNIVERSITETI I TIRANËS – FAKULTETI I SHKENCAVE TË NATYRËS (FSHN)
+</div>
+
+<h1>Sistemi i Rezervimit të Fluturimeve</h1>
+
+<div class="container">
+  <!-- KOLUMNA MAJTAS – TABELA E FLUTURIMEVE -->
+  <div class="column">
+    <h2>Lista e fluturimeve</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Kodi</th>
+          <th>Nga</th>
+          <th>Në</th>
+          <th>Ora</th>
+          <th>Çmimi (€)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>FSHN101</td><td>Tiranë</td><td>Romë</td><td>10:30</td><td>120</td></tr>
+        <tr><td>FSHN202</td><td>Tiranë</td><td>Stamboll</td><td>14:15</td><td>150</td></tr>
+        <tr><td>FSHN303</td><td>Tiranë</td><td>Londër</td><td>18:45</td><td>250</td></tr>
+        <tr><td>FSHN404</td><td>Tiranë</td><td>Berlin</td><td>09:00</td><td>180</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- KOLUMNA DJATHTAS – FORMA E APLIKACIONIT -->
+  <div class="column">
+    <h2>Forma e rezervimit</h2>
+
+    <form id="bookingForm">
+      <label>Emri:
+        <input type="text" id="name" required />
+      </label>
+
+      <label>Mbiemri:
+        <input type="text" id="surname" required />
+      </label>
+
+      <label>Nr. Pasaporte:
+        <input type="text" id="passport" required />
+      </label>
+
+      <label>Zgjidh fluturimin:</label>
+      <select id="flightSelect" required>
+        <option value="">-- Zgjidh fluturimin --</option>
+
+        <option value="FSHN101" data-from="Tiranë" data-to="Romë" data-time="10:30" data-price="120">
+          FSHN101 - Tiranë → Romë (10:30) - 120 €
+        </option>
+        <option value="FSHN202" data-from="Tiranë" data-to="Stamboll" data-time="14:15" data-price="150">
+          FSHN202 - Tiranë → Stamboll (14:15) - 150 €
+        </option>
+        <option value="FSHN303" data-from="Tiranë" data-to="Londër" data-time="18:45" data-price="250">
+          FSHN303 - Tiranë → Londër (18:45) - 250 €
+        </option>
+        <option value="FSHN404" data-from="Tiranë" data-to="Berlin" data-time="09:00" data-price="180">
+          FSHN404 - Tiranë → Berlin (09:00) - 180 €
+        </option>
+      </select>
+
+      <label>Klasa:
+        <select id="flightClass">
+          <option value="Economy">Economy</option>
+          <option value="Business">Business</option>
+          <option value="First">First</option>
+        </select>
+      </label>
+
+      <button type="submit">Shto rezervimin</button>
+
+      <div class="row-actions">
+        <button type="button" id="clearAllBtn">Fshi të gjitha rezervimet</button>
+      </div>
+    </form>
+
+    <h2>Bileta e fundit</h2>
+    <div id="ticket">Këtu do shfaqet bileta pas rezervimit...</div>
+
+    <h2>Të gjitha rezervimet</h2>
+    <div class="list-box">
+      <div id="bookingsList">Nuk ka rezervime ende.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const form = document.getElementById("bookingForm");
+  const ticketDiv = document.getElementById("ticket");
+  const bookingsListDiv = document.getElementById("bookingsList");
+  const clearAllBtn = document.getElementById("clearAllBtn");
+
+  const STORAGE_KEY = "fshn_bookings";
+
+  function loadBookings() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveBookings(bookings) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
+  }
+
+  function renderBookings() {
+    const bookings = loadBookings();
+
+    if (bookings.length === 0) {
+      bookingsListDiv.textContent = "Nuk ka rezervime ende.";
+      ticketDiv.textContent = "Këtu do shfaqet bileta pas rezervimit...";
+      return;
+    }
+
+    // shfaq bileten e fundit
+    ticketDiv.textContent = bookings[bookings.length - 1].ticketText;
+
+    // shfaq te gjitha (nga me e reja tek me e vjetra)
+    bookingsListDiv.innerHTML = "";
+    const reversed = [...bookings].reverse();
+
+    reversed.forEach((b, idxFromNewest) => {
+      const item = document.createElement("div");
+      item.className = "booking-item";
+
+      const number = bookings.length - idxFromNewest; // 1..n (sa me i madh, aq me i ri)
+      item.textContent = "Rezervimi #" + number + "\n" + b.ticketText;
+
+      bookingsListDiv.appendChild(item);
+    });
+  }
+
+  // Kur hapet faqja: lexo dhe shfaq
+  renderBookings();
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value.trim();
+    const surname = document.getElementById("surname").value.trim();
+    const passport = document.getElementById("passport").value.trim();
+
+    const select = document.getElementById("flightSelect");
+    const option = select.options[select.selectedIndex];
+
+    const flightClass = document.getElementById("flightClass").value;
+
+    if (!name || !surname || !passport || !select.value) {
+      alert("Ju lutem plotësoni të gjitha fushat!");
+      return;
+    }
+
+    const flightId = option.value;
+    const from = option.getAttribute("data-from");
+    const to = option.getAttribute("data-to");
+    const time = option.getAttribute("data-time");
+    let price = parseFloat(option.getAttribute("data-price"));
+
+    if (flightClass === "Business") price *= 1.5;
+    if (flightClass === "First") price *= 2;
+
+    const ticketText =
+      "------------------------------\n" +
+      "     UNIVERSITETI I TIRANËS\n" +
+      " FAKULTETI I SHKENCAVE TË NATYRËS\n" +
+      "          BILETË FLUTURIMI\n" +
+      "------------------------------\n" +
+      "Pasagjeri : " + name + " " + surname + "\n" +
+      "Pasaporta : " + passport + "\n\n" +
+      "Fluturimi : " + flightId + "\n" +
+      "Nga       : " + from + "\n" +
+      "Në        : " + to + "\n" +
+      "Ora       : " + time + "\n" +
+      "Klasa     : " + flightClass + "\n" +
+      "Çmimi     : " + price.toFixed(2) + " €\n" +
+      "------------------------------";
+
+    const bookings = loadBookings();
+
+    bookings.push({
+      id: Date.now(),          // id unike
+      name, surname, passport,
+      flightId, from, to, time,
+      flightClass,
+      price: Number(price.toFixed(2)),
+      ticketText
+    });
+
+    saveBookings(bookings);
+    renderBookings();
+
+    form.reset();
+  });
+
+  clearAllBtn.addEventListener("click", function () {
+    localStorage.removeItem(STORAGE_KEY);
+    renderBookings();
+  });
+</script>
+
+</body>
+</html>
