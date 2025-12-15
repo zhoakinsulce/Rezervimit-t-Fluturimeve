@@ -28,4 +28,17 @@ Ky projekt paraqet një aplikacion të thjeshtë Web për **rezervimin e fluturi
 - Gjenerim dinamik i **biletës së fluturimit**.
 - Verifikim i të dhënave që vendos përdoruesi
 ---
+## Përmirësime – localStorage
 
+Në këtë projekt është shtuar përdorimi i localStorage për ruajtjen e
+rezervimeve të fluturimeve, në mënyrë që të dhënat të mos humbasin pas
+rifreskimit të faqes.
+
+### Rezervimi i fundit
+Ky version ruan vetëm rezervimin e fundit që bëhet nga përdoruesi dhe e
+shfaq atë përsëri kur faqja rifreskohet.
+
+### Të gjitha rezervimet
+Në këtë version ruhen të gjitha rezervimet në localStorage dhe ato
+shfaqen si listë sa herë që hapet faqja. Kjo bën të mundur që përdoruesi
+të shohë historikun e rezervimeve pa përdorur backend ose databazë.
